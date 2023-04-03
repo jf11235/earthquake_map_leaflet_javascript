@@ -21,16 +21,16 @@ d3.json(queryUrl).then(function (data) {
       onEachFeature: onEachFeature
     });
 
-   console.log(earthquakeData)
+   //console.log(earthquakeData)
 
   
     // Send our earthquakes layer to the createMap function/
-    createMap(earthquakes);
+    createMap(earthquakes, earthquakeData);
   }
 
  
   
-  function createMap(earthquakes) {
+  function createMap(earthquakes, earthquakeData) {
   
 
     // THESE LINKS ARENT WORKING
@@ -42,7 +42,6 @@ d3.json(queryUrl).then(function (data) {
 
     // Create a baseMaps object.
     var baseMaps = {
-        "Topographic Map": topo,
       "Satellite Map": satellite
     };
   
@@ -63,48 +62,56 @@ d3.json(queryUrl).then(function (data) {
   
 
 
-// Loop through the cities array, and create one marker for each city object.
-for (var i = 0; i < earthquakeData.length; i++) {
-    var location = [earthquakeData[i].coordinates[1], earthquakeData[i].coordinates[0]]
-    var depth = earthquakeData[i].coordinates[2]
-    // Conditionals for country mag
-    var color = "";
-    if (earthquakeData[i].mag > 8) {
-      color = "red";
-    }
-    else if (earthquakeData[i].mag > 5) {
-      color = "yellow";
-    }
-    else if (earthquakeData[i].mag > 3) {
-      color = "blue";
-    }
-    else {
-      color = "green";
-    }
-  
-    // Add circles to the map.
-    L.circle(earthquakeData[i].location, {
-      fillOpacity: 0.75,
-      color: "white",
-      fillColor: color,
-      // Adjust the radius.
-      radius: (earthquakeData[i].mag) * 500
-    }).bindPopup(`<h1>${earthquakeData[i].place}</h1> <hr> <h3>Earthquake Magnitude: ${earthquakeData[i].mag}</h3>`).addTo(myMap);
-  }
-
-  // Create a legend to display information about our map.
-    var info = L.control({
-        position: "bottomright"
+    // Loop through the cities array, and create one marker for each city object.
+    for (var i = 0; i < earthquakeData.length; i++) {
+        var lat = earthquakeData[i].geometry.coordinates[1];
+        var lon = earthquakeData[i].geometry.coordinates[0];
+        var depth = earthquakeData[i].geometry.coordinates[2];
+        var mag = earthquakeData[i].properties.mag;
+        var place = earthquakeData[i].properties.place;
+        
+        
+        // Conditionals for country mag
+        var color = "";
+        if (mag > 8) {
+        color = "red";
+        }
+        else if (mag > 5) {
+        color = "yellow";
+        }
+        else if (mag > 3) {
+        color = "blue";
+        }
+        else {
+        color = "green";
+        }
+    
+        // // Add circles to the map.
+        L.circle([lat,lon], {
+        fillOpacity: 0.75,
+        color: color,
+        // fillColor: color,
+        // Adjust the radius.
+        radius: (mag) * 50000
+        //}).bindPopup(`<h1>${place}</h1> <hr> <h3>Earthquake Magnitude: ${mag}</h3>`).addTo(myMap);
         }).addTo(myMap);
-  
-  
-  
-    // Create a layer control.
-    // Pass it our baseMaps and overlayMaps.
-    // Add the layer control to the map.
-    L.control.layers(baseMaps, overlayMaps, {
-      collapsed: false
-    }).addTo(myMap);
-  
+
+       
+    }
+
+    // Create a legend to display information about our map.
+        var info = L.control({
+            position: "bottomright"
+            }).addTo(myMap);
+    
+    
+    
+        // Create a layer control.
+        // Pass it our baseMaps and overlayMaps.
+        // Add the layer control to the map.
+        L.control.layers(baseMaps, overlayMaps, {
+        collapsed: false
+        }).addTo(myMap);
+    
   }
   
