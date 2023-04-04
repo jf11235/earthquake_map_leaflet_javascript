@@ -65,7 +65,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 
 
-      // Create a new choropleth layer.
+      
       geojson = L.geoJson(data, {
     
         pointToLayer: function(feature, latlng) {
