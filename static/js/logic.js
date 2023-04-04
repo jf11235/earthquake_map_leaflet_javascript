@@ -33,6 +33,9 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           }
         
           // This function determines the color of the marker based on the magnitude of the earthquake.
+          // I had written this in a previous code. I was stuck and Chris helped me clean up my code in office hours. 
+          // He had deleted the conditional portion of my code, and gave me this
+          // so I didnt have to re-write it all. 
           function getColor(depth) {
             switch (true) {
               case depth > 90:
@@ -76,44 +79,10 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
         style: styleInfo, //calls thefunction named 'styleInfo'
     
-        // Binding a popup to each layer
-        /*
-        onEachFeature: function(feature, layer) {
-          layer.bindPopup("<strong>" + feature.properties.NAME + "</strong><br /><br />Estimated employed population with children age 6-17: " +
-            feature.properties.DP03_16E + "<br /><br />Estimated Total Income and Benefits for Families: $" + feature.properties.DP03_75E);
-        }
-        */
+      
       }).addTo(myMap);
     
-      /*
-      // Set up the legend.
-      var legend = L.control({ position: "bottomright" });
-      legend.onAdd = function() {
-        var div = L.DomUtil.create("div", "info legend");
-        var limits = geojson.options.limits;
-        var colors = geojson.options.colors;
-        var labels = [];
-    
-        // Add the minimum and maximum.
-        var legendInfo = "<h1>Population with Children<br />(ages 6-17)</h1>" +
-          "<div class=\"labels\">" +
-            "<div class=\"min\">" + limits[0] + "</div>" +
-            "<div class=\"max\">" + limits[limits.length - 1] + "</div>" +
-          "</div>";
-    
-        div.innerHTML = legendInfo;
-    
-        limits.forEach(function(limit, index) {
-          labels.push("<li style=\"background-color: " + colors[index] + "\"></li>");
-        });
-    
-        div.innerHTML += "<ul>" + labels.join("") + "</ul>";
-        return div;
-      };
-    
-      // Adding the legend to the map
-      legend.addTo(myMap);
-    */
+      
     
     });
     
