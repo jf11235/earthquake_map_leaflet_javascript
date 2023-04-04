@@ -13,7 +13,6 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(myMap);
 
 
-
     var geojson;
 
     // Get the data with d3.
@@ -21,12 +20,14 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     
 
         function styleInfo(feature) {
+            let fillDepth = feature.geometry.coordinates[2]
+            let mag = feature.properties.mag
             return {
               opacity: 1,
               fillOpacity: 1,
-              fillColor: getColor(feature.geometry.coordinates[2]),
+              fillColor: getColor(fillDepth),
               color: "#000000",
-              radius: getRadius(feature.properties.mag),
+              radius: getRadius(mag),
               stroke: true,
               weight: 0.5
             };
@@ -63,26 +64,16 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             return magnitude * 4;
           }
 
-
-
-      
       geojson = L.geoJson(data, {
     
         pointToLayer: function(feature, latlng) {
             return L.circleMarker(latlng)
         },
-    
-
-        
-
-        
 
         style: styleInfo, //calls thefunction named 'styleInfo'
     
       
       }).addTo(myMap);
-    
-      
     
     });
     
