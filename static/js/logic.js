@@ -1,117 +1,120 @@
 var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson"
 
-
-// Perform a GET request to the query URL/
-d3.json(queryUrl).then(function (data) {
-    // Once we get a response, send the data.features object to the createFeatures function.
-    createFeatures(data.features);
-  });
-  
-  function createFeatures(earthquakeData) {
-  
-    // Define a function that we want to run once for each feature in the features array.
-    // Give each feature a popup that describes the place and time of the earthquake.
-    function onEachFeature(feature, layer) {
-      layer.bindPopup(`<h3>${feature.properties.place}</h3><hr><p>${new Date(feature.properties.time)}</p>`);
-    }
-  
-    // Create a GeoJSON layer that contains the features array on the earthquakeData object.
-    // Run the onEachFeature function once for each piece of data in the array.
-    var earthquakes = L.geoJSON(earthquakeData, {
-      onEachFeature: onEachFeature
-    });
-
-   //console.log(earthquakeData)
-
-  
-    // Send our earthquakes layer to the createMap function/
-    createMap(earthquakes, earthquakeData);
-  }
-
- 
-  
-  function createMap(earthquakes, earthquakeData) {
-  
-
-    // THESE LINKS ARENT WORKING
-
-    // Create the base layers.
-    var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Map data &copy; <a href="https://www.esri.com/en-us/home">Esri</a>, <a href="https://www.microsoft.com/en-us/maps">Microsoft</a>, <a href="https://www.maxar.com/">Maxar</a>, <a href="https://www.mapbox.com/">Mapbox</a>, <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, and the GIS user community'
-});
-
-    // Create a baseMaps object.
-    var baseMaps = {
-      "Satellite Map": satellite
-    };
-  
-    // Create an overlay object to hold our overlay.
-    var overlayMaps = {
-      Earthquakes: earthquakes
-    };
-  
     // Create our map, giving it the streetmap and earthquakes layers to display on load.
     var myMap = L.map("map", {
       center: [
         37.09, -75.71
       ],
-      zoom: 3,
-      layers: [satellite, earthquakes]
+      zoom: 3
     });
+// Adding the tile layer
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(myMap);
 
-  
 
 
-    // Loop through the cities array, and create one marker for each city object.
-    for (var i = 0; i < earthquakeData.length; i++) {
-        var lat = earthquakeData[i].geometry.coordinates[1];
-        var lon = earthquakeData[i].geometry.coordinates[0];
-        var depth = earthquakeData[i].geometry.coordinates[2];
-        var mag = earthquakeData[i].properties.mag;
-        var place = earthquakeData[i].properties.place;
+    var geojson;
+
+    // Get the data with d3.
+    d3.json(queryUrl).then(function(data) {
+    
+
+        function styleInfo(feature) {
+            return {
+              opacity: 1,
+              fillOpacity: 1,
+              fillColor: getColor(feature.geometry.coordinates[2]),
+              color: "#000000",
+              radius: getRadius(feature.properties.mag),
+              stroke: true,
+              weight: 0.5
+            };
+          }
         
+          // This function determines the color of the marker based on the magnitude of the earthquake.
+          function getColor(depth) {
+            switch (true) {
+              case depth > 90:
+                return "#ea2c2c";
+              case depth > 70:
+                return "#ea822c";
+              case depth > 50:
+                return "#ee9c00";
+              case depth > 30:
+                return "#eecc00";
+              case depth > 10:
+                return "#d4ee00";
+              default:
+                return "#98ee00";
+            }
+          }
         
-        // Conditionals for country mag
-        var color = "";
-        if (mag > 8) {
-        color = "red";
-        }
-        else if (mag > 5) {
-        color = "yellow";
-        }
-        else if (mag > 3) {
-        color = "blue";
-        }
-        else {
-        color = "green";
-        }
-    
-        // // Add circles to the map.
-        L.circle([lat,lon], {
-        fillOpacity: 0.75,
-        color: color,
-        // fillColor: color,
-        // Adjust the radius.
-        radius: (mag) * 50000
-        //}).bindPopup(`<h1>${place}</h1> <hr> <h3>Earthquake Magnitude: ${mag}</h3>`).addTo(myMap);
-        }).addTo(myMap);
+          // This function determines the radius of the earthquake marker based on its magnitude.
+          // Earthquakes with a magnitude of 0 were being plotted with the wrong radius.
+          function getRadius(magnitude) {
+            if (magnitude === 0) {
+              return 1;
+            }
+        
+            return magnitude * 4;
+          }
 
-       
-    }
 
-    // Create a legend to display information about our map.
-        var info = L.control({
-            position: "bottomright"
-            }).addTo(myMap);
+
+      // Create a new choropleth layer.
+      geojson = L.geoJson(data, {
     
+        pointToLayer: function(feature, latlng) {
+            return L.circleMarker(latlng)
+        },
     
+
+        
+
+        
+
+        style: styleInfo, //calls thefunction named 'styleInfo'
     
-        // Create a layer control.
-        // Pass it our baseMaps and overlayMaps.
-        // Add the layer control to the map.
-        L.control.layers(baseMaps, overlayMaps, {
-        collapsed: false
-        }).addTo(myMap);
+        // Binding a popup to each layer
+        /*
+        onEachFeature: function(feature, layer) {
+          layer.bindPopup("<strong>" + feature.properties.NAME + "</strong><br /><br />Estimated employed population with children age 6-17: " +
+            feature.properties.DP03_16E + "<br /><br />Estimated Total Income and Benefits for Families: $" + feature.properties.DP03_75E);
+        }
+        */
+      }).addTo(myMap);
     
-  }
+      /*
+      // Set up the legend.
+      var legend = L.control({ position: "bottomright" });
+      legend.onAdd = function() {
+        var div = L.DomUtil.create("div", "info legend");
+        var limits = geojson.options.limits;
+        var colors = geojson.options.colors;
+        var labels = [];
+    
+        // Add the minimum and maximum.
+        var legendInfo = "<h1>Population with Children<br />(ages 6-17)</h1>" +
+          "<div class=\"labels\">" +
+            "<div class=\"min\">" + limits[0] + "</div>" +
+            "<div class=\"max\">" + limits[limits.length - 1] + "</div>" +
+          "</div>";
+    
+        div.innerHTML = legendInfo;
+    
+        limits.forEach(function(limit, index) {
+          labels.push("<li style=\"background-color: " + colors[index] + "\"></li>");
+        });
+    
+        div.innerHTML += "<ul>" + labels.join("") + "</ul>";
+        return div;
+      };
+    
+      // Adding the legend to the map
+      legend.addTo(myMap);
+    */
+    
+    });
+    
   
