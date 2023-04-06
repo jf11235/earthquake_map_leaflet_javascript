@@ -77,7 +77,37 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     
       
       }).addTo(myMap);
-    
+
+      //Include popups that provide additional information about the earthquake when its associated marker is clicked.
+      geojson.bindPopup(function (layer) {
+        return `Magnitude: ${layer.feature.properties.mag} <br>Depth: ${layer.feature.geometry.coordinates[2]} <br>Location: ${layer.feature.properties.place}`;
+      });
+
+      //Create a legend that will provide context for your map data.
+      var legend = L.control({ position: "bottomright" });
+      legend.onAdd = function() {
+        var div = L.DomUtil.create("div", "info legend");
+        var grades = [-10, 10, 30, 50, 70, 90];
+        var colors = [
+          "#98ee00",
+          "#d4ee00",
+          "#eecc00",
+          "#ee9c00",
+          "#ea822c",
+          "#ea2c2c"
+        ];
+        
+
+        // Looping through our intervals to generate a label with a colored square for each interval.
+        for (var i = 0; i < grades.length; i++) {
+          div.innerHTML +=
+            "<i style='background: " + colors[i] + "'></i> " +
+            grades[i] + (grades[i + 1] ? "&ndash;" + grades[i + 1] + "<br>" : "+");
+        }
+        return div;
+      }
+    legend.addTo(myMap); 
+
     });
     
   
