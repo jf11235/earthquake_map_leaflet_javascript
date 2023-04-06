@@ -102,8 +102,9 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         for (var i = 0; i < grades.length; i++) {
           div.innerHTML +=
             "<i style='background: " + colors[i] + "'></i> " +
-            grades[i] + (grades[i + 1] ? "&ndash;" + grades[i + 1] + "<br>" : "+");
+            grades[i] + (grades[i + 1] ? "&ndash;" + grades[i + 1] : "+&nbsp;") + "<br>";
         }
+        
         return div;
       }
     legend.addTo(myMap); 
